@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AME CUTOFF BOOK MAKER</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0d1117;
+            --bg2: #161b22;
+            --bg3: #21262d;
+            --border: #30363d;
+            --border2: #444c56;
+            --text: #e6edf3;
+            --text2: #8b949e;
+            --text3: #6e7681;
+            --gold: #d4a017;
+            --gold2: #f0c040;
+            --blue: #1f6feb;
+            --blue2: #388bfd;
+            --green: #238636;
+            --green2: #3fb950;
+            --red: #da3633;
+            --red2: #f85149;
+            --purple: #6e40c9;
+            --purple2: #a371f7;
+            --orange: #db6d28;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ═══════════════ TOP HEADER ═══════════════ */
+        .top-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(13,17,23,0.97);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .header-logo {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid var(--gold);
+            object-fit: cover;
+            box-shadow: 0 0 12px rgba(212,160,23,0.4);
+        }
+
+        .header-title {
+            font-size: 15px;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--gold2), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .header-sub {
+            font-size: 10px;
+            color: var(--text3);
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .header-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            background: rgba(35,134,54,0.15);
+            border: 1px solid rgba(63,185,80,0.3);
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--green2);
+        }
+
+        .pulse-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--green2);
+            animation: pulse 1.8s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.4); }
+        }
+
+        /* ═══════════════ MAIN LAYOUT ═══════════════ */
+        .app-shell {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* ═══════════════ SIDEBAR ═══════════════ */
+        .sidebar {
+            background: var(--bg2);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 60px;
+            height: calc(100vh - 60px);
+            overflow: hidden;
+        }
+
+        .sidebar-section {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-section:last-child { border-bottom: none; flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+        .sidebar-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text3);
+            margin-bottom: 10px;
+        }
+
+        .sidebar-label i { font-size: 11px; }
+
+        /* Excel path */
+        .path-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .path-input {
+            flex: 1;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 7px 10px;
+            color: var(--text);
+            font-size: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            outline: none;
+            transition: border-color 0.2s;
+            min-width: 0;
+        }
+
+        .path-input:focus { border-color: var(--blue2); }
+
+        .icon-btn {
+            width: 30px; height: 30px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg3);
+            color: var(--text2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .icon-btn:hover { background: var(--bg2); border-color: var(--border2); color: var(--text); }
+        .icon-btn.green:hover { background: rgba(35,134,54,0.2); border-color: var(--green2); color: var(--green2); }
+        .icon-btn.gold:hover { background: rgba(212,160,23,0.2); border-color: var(--gold); color: var(--gold2); }
+        .icon-btn.red:hover { background: rgba(218,54,51,0.2); border-color: var(--red2); color: var(--red2); }
+
+        .save-confirm {
+            font-size: 10px;
+            color: var(--green2);
+            margin-top: 4px;
+            display: none;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* College search */
+        .search-input {
+            width: 100%;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px 8px 32px;
+            color: var(--text);
+            font-size: 12px;
+            outline: none;
+            transition: border-color 0.2s;
+            position: relative;
+        }
+
+        .search-input:focus { border-color: var(--blue2); }
+
+        .search-wrap {
+            position: relative;
+            margin-bottom: 8px;
+        }
+
+        .search-wrap i {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text3);
+            font-size: 12px;
+            pointer-events: none;
+        }
+
+        .college-count {
+            font-size: 10px;
+            color: var(--text3);
+            text-align: right;
+            margin-bottom: 6px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .college-list {
+            flex: 1;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border2) transparent;
+        }
+
+        .college-list::-webkit-scrollbar { width: 4px; }
+        .college-list::-webkit-scrollbar-track { background: transparent; }
+        .college-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+        .college-item {
+            padding: 8px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-bottom: 2px;
+            border: 1px solid transparent;
+        }
+
+        .college-item:hover {
+            background: var(--bg3);
+            border-color: var(--border);
+        }
+
+        .college-item.active {
+            background: rgba(31,111,235,0.15);
+            border-color: rgba(56,139,253,0.4);
+        }
+
+        .college-item-code {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--gold2);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .college-item-name {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text);
+            line-height: 1.3;
+            margin-top: 1px;
+        }
+
+        .college-item-meta {
+            font-size: 10px;
+            color: var(--text3);
+            margin-top: 2px;
+        }
+
+        /* ═══════════════ MAIN CONTENT ═══════════════ */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            overflow: auto;
+        }
+
+        /* ═══════════════ CONTROL BAR ═══════════════ */
+        .control-bar {
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            no-print: display;
+        }
+
+        .quota-badges {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+
+        .quota-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            border: 1px solid;
+            transition: all 0.2s;
+            cursor: default;
+        }
+
+        .quota-pill.avail {
+            background: rgba(35,134,54,0.18);
+            border-color: rgba(63,185,80,0.5);
+            color: var(--green2);
+        }
+
+        .quota-pill.unavail {
+            background: rgba(48,54,61,0.5);
+            border-color: var(--border);
+            color: var(--text3);
+        }
+
+        .quota-pill i { font-size: 9px; }
+
+        .control-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        /* ═══════════════ TABLE MODE TABS ═══════════════ */
+        .mode-tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--bg3);
+            padding: 4px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .mode-tab {
+            padding: 5px 12px;
+            border-radius: 7px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: none;
+            background: transparent;
+            color: var(--text2);
+            white-space: nowrap;
+        }
+
+        .mode-tab:hover { background: var(--bg2); color: var(--text); }
+        .mode-tab.active { background: var(--blue); color: #fff; }
+
+        /* Action buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid;
+            transition: all 0.2s;
+            white-space: nowrap;
+            text-decoration: none;
+        }
+
+        .btn-regen {
+            background: rgba(218,54,51,0.15);
+            border-color: rgba(248,81,73,0.4);
+            color: var(--red2);
+        }
+        .btn-regen:hover {
+            background: rgba(218,54,51,0.3);
+            border-color: var(--red2);
+        }
+
+        .btn-docx {
+            background: rgba(31,111,235,0.15);
+            border-color: rgba(56,139,253,0.4);
+            color: var(--blue2);
+        }
+        .btn-docx:hover {
+            background: rgba(31,111,235,0.3);
+            border-color: var(--blue2);
+        }
+
+        .btn-print {
+            background: var(--bg3);
+            border-color: var(--border);
+            color: var(--text2);
+        }
+        .btn-print:hover {
+            background: var(--bg2);
+            border-color: var(--border2);
+            color: var(--text);
+        }
+
+        /* ═══════════════ BOOK CONTAINER ═══════════════ */
+        .book-area {
+            flex: 1;
+            padding: 24px;
+        }
+
+        /* College info header */
+        .college-header-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .college-header-left {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .college-logo {
+            width: 52px; height: 52px;
+            border-radius: 50%;
+            border: 2px solid var(--gold);
+            object-fit: cover;
+            box-shadow: 0 0 16px rgba(212,160,23,0.25);
+            flex-shrink: 0;
+        }
+
+        .college-name-block { flex: 1; min-width: 0; }
+
+        .college-full-name {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--gold2);
+            line-height: 1.3;
+            margin-bottom: 6px;
+        }
+
+        .college-address {
+            font-size: 11px;
+            color: var(--text2);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .college-meta-tags {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .meta-tag {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            text-align: right;
+            max-width: 320px;
+            white-space: normal;
+            word-break: break-word;
+            line-height: 1.4;
+        }
+
+        .meta-tag.gold {
+            background: rgba(212,160,23,0.15);
+            border: 1px solid rgba(212,160,23,0.3);
+            color: var(--gold2);
+        }
+
+        .meta-tag.blue {
+            background: rgba(31,111,235,0.15);
+            border: 1px solid rgba(56,139,253,0.3);
+            color: var(--blue2);
+        }
+
+        .college-summary {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 11px;
+            color: var(--text2);
+            margin-top: 10px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        /* Progress bar */
+        .progress-card {
+            background: var(--bg2);
+            border: 1px solid rgba(248,81,73,0.3);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .progress-card.show { display: block; }
+
+        .progress-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .progress-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .spinner {
+            width: 18px; height: 18px;
+            border: 2px solid rgba(248,81,73,0.3);
+            border-top-color: var(--red2);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .progress-pct {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--red2);
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 6px;
+            background: var(--bg3);
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--red2), var(--gold));
+            border-radius: 6px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-status {
+            font-size: 11px;
+            color: var(--text2);
+            margin-top: 6px;
+        }
+
+        /* Warnings */
+        .warnings-card {
+            background: rgba(219,109,40,0.1);
+            border: 1px solid rgba(219,109,40,0.3);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            display: none;
+            font-size: 11px;
+            color: #e8a87c;
+        }
+
+        .warnings-card.show { display: block; }
+        .warnings-title { font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+
+        /* Table sections */
+        .table-section {
+            margin-bottom: 28px;
+        }
+
+        .table-section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .table-section-title .icon-circle {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .icon-circle.hu { background: rgba(31,111,235,0.2); color: var(--blue2); }
+        .icon-circle.ohu { background: rgba(110,64,201,0.2); color: var(--purple2); }
+        .icon-circle.state { background: rgba(35,134,54,0.2); color: var(--green2); }
+
+        .table-title-text {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        /* Cutoff table */
+        .cutoff-table-wrap {
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .cutoff-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        .cutoff-table thead th {
+            background: #1c2a3a;
+            color: #93c5fd;
+            font-weight: 700;
+            padding: 9px 8px;
+            text-align: center;
+            border-bottom: 2px solid #2563eb;
+            white-space: nowrap;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .cutoff-table thead th:first-child {
+            text-align: left;
+            padding-left: 14px;
+            width: 220px;
+        }
+
+        .cutoff-table thead th:nth-child(2) { width: 60px; }
+
+        .cutoff-table tbody tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+        .cutoff-table tbody tr:hover { background: rgba(31,111,235,0.07); }
+
+        .cutoff-table tbody td {
+            padding: 7px 8px;
+            text-align: center;
+            border-bottom: 1px solid rgba(48,54,61,0.6);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text);
+        }
+
+        .cutoff-table tbody td:first-child {
+            text-align: left;
+            padding-left: 14px;
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--gold2);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .cutoff-table tbody td.gender-male { color: #7dd3fc; font-weight: 600; font-family: 'Inter', sans-serif; font-size: 10px; }
+        .cutoff-table tbody td.gender-female { color: #f9a8d4; font-weight: 600; font-family: 'Inter', sans-serif; font-size: 10px; }
+
+        .cell-val { color: var(--text); font-weight: 600; }
+        .cell-empty { color: var(--text3); }
+
+        .cell-ews { color: #86efac; }
+        .cell-tfws { color: #c4b5fd; }
+        .cell-ai { color: #fcd34d; }
+        .cell-shared { vertical-align: middle; }
+        .ai-pct { display: block; font-size: 9px; color: #fcd34d; opacity: 0.85; font-weight: 500; }
+        .cet-pct { display: block; font-size: 9px; color: #7dd3fc; opacity: 0.8; font-weight: 500; }
+
+        .quota-pill.ai {
+            background: rgba(212,160,23,0.15);
+            border-color: rgba(212,160,23,0.5);
+            color: var(--gold2);
+        }
+
+        /* Empty quota notice */
+        .empty-quota-card {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 32px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .empty-quota-card i {
+            font-size: 28px;
+            color: var(--text3);
+            margin-bottom: 12px;
+        }
+
+        .empty-quota-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text2);
+            margin-bottom: 8px;
+        }
+
+        .empty-quota-sub {
+            font-size: 12px;
+            color: var(--text3);
+            max-width: 400px;
+            margin: 0 auto 16px;
+            line-height: 1.5;
+        }
+
+        .empty-state-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 16px;
+            border-radius: 8px;
+            background: rgba(35,134,54,0.2);
+            border: 1px solid rgba(63,185,80,0.4);
+            color: var(--green2);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .empty-state-link:hover { background: rgba(35,134,54,0.35); }
+
+        /* Placeholder */
+        .placeholder-state {
+            text-align: center;
+            padding: 80px 40px;
+            color: var(--text3);
+        }
+
+        .placeholder-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: var(--border2);
+        }
+
+        .placeholder-state h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text2);
+            margin-bottom: 8px;
+        }
+
+        .placeholder-state p {
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        /* Print */
+        @media print {
+            .top-header, .sidebar, .control-bar, .no-print { display: none !important; }
+            .app-shell { grid-template-columns: 1fr; }
+            .main-content { overflow: visible; }
+            body { background: white; color: black; }
+            .college-header-card, .table-section { page-break-inside: avoid; }
+            .cutoff-table tbody tr:hover { background: transparent; }
+            .cutoff-table thead th { background: #1e3a8a; color: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .cutoff-table tbody td { color: black; border-color: #ccc; }
+            .college-full-name { color: #b45309; }
+        }
+
+        /* Scrollbar global */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+        .tag-instant {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--purple2);
+            background: rgba(110,64,201,0.15);
+            border: 1px solid rgba(163,113,247,0.3);
+            padding: 3px 8px;
+            border-radius: 20px;
+        }
+
+        .user-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-family: 'JetBrains Mono', monospace; font-size: 10px;
+            color: var(--gold2); background: rgba(212,160,23,0.12);
+            border: 1px solid rgba(240,192,64,0.35);
+            padding: 4px 10px; border-radius: 20px;
+        }
+        .logout-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 11px; font-weight: 600; letter-spacing: .4px;
+            color: var(--text2); background: rgba(48,54,61,0.5);
+            border: 1px solid var(--border2); padding: 5px 11px;
+            border-radius: 20px; text-decoration: none;
+            transition: color .18s, border-color .18s, background .18s, transform .18s;
+        }
+        .logout-btn:hover {
+            color: var(--red2); border-color: rgba(248,81,73,0.5);
+            background: rgba(248,81,73,0.1); transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══════════════ TOP HEADER ═══════════════ -->
+    <header class="top-header no-print">
+        <div class="header-brand">
+            <img src="/static/logo.jpg" alt="AME" class="header-logo" onerror="this.style.display='none'">
+            <div>
+                <div class="header-title">AME Cutoff Book Maker</div>
+                <div class="header-sub">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    Admissions Made Easy, Latur &nbsp;•&nbsp; 94226 11661
+                </div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="header-badge">
+                <div class="pulse-dot"></div>
+                <span id="headerCacheStatus">Loading...</span>
+            </div>
+            <span class="tag-instant">
+                <i class="fa-solid fa-bolt"></i> Instant Cache
+            </span>
+            {% if logged_user %}
+            <span class="user-chip"><i class="fa-solid fa-circle-user"></i> {{ logged_user }}</span>
+            {% endif %}
+            <a href="/logout" class="logout-btn" title="Logout">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </a>
+        </div>
+    </header>
+
+    <!-- ═══════════════ APP SHELL ═══════════════ -->
+    <div class="app-shell">
+
+        <!-- ═══════════════ SIDEBAR ═══════════════ -->
+        <aside class="sidebar no-print">
+
+            <!-- Excel Path Section -->
+            <div class="sidebar-section">
+                <div class="sidebar-label">
+                    <i class="fa-solid fa-file-excel" style="color:#22c55e"></i>
+                    Data Source
+                </div>
+                <div class="path-row">
+                    <input type="text" id="excelPath" value="{{ default_path }}" class="path-input" placeholder="CET Excel file path...">
+                    <button class="icon-btn green" onclick="saveExcelPath()" title="Save CET path">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                    </button>
+                    <button class="icon-btn red" onclick="resetExcelPath()" title="Reset CET path">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
+                </div>
+                <div class="save-confirm" id="saveConfirm">
+                    <i class="fa-solid fa-check-circle"></i> CET path saved!
+                </div>
+
+                <div class="sidebar-label" style="margin-top:14px;">
+                    <i class="fa-solid fa-robot" style="color:#fcd34d"></i>
+                    AI (JEE) Excel Path
+                </div>
+                <div class="path-row">
+                    <input type="text" id="aiExcelPath" value="{{ ai_path }}" class="path-input" placeholder="AI (JEE) Excel file path...">
+                    <button class="icon-btn green" onclick="saveAiPath()" title="Save AI (JEE) path">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                    </button>
+                    <button class="icon-btn red" onclick="resetAiPath()" title="Reset AI (JEE) path">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
+                </div>
+                <div class="save-confirm" id="saveAiConfirm">
+                    <i class="fa-solid fa-check-circle"></i> AI (JEE) path saved!
+                </div>
+                <div style="display:flex; gap:6px; margin-top:8px;">
+                    <button class="btn btn-print" style="flex:1; justify-content:center;" onclick="rebuildAll()" id="btnRebuildAll" title="Re-generate every table with latest CET + AI (JEE) data">
+                        <i class="fa-solid fa-arrows-rotate"></i> Rebuild All Tables
+                    </button>
+                </div>
+            </div>
+
+            <!-- College Search Section -->
+            <div class="sidebar-section" style="flex:1; overflow:hidden; display:flex; flex-direction:column;">
+                <div class="sidebar-label">
+                    <i class="fa-solid fa-building-columns" style="color:#388bfd"></i>
+                    Select College
+                    <span id="collegeCountLabel" style="margin-left:auto; font-weight:700; color:#f0c040; font-size:10px; text-transform:none; letter-spacing:0;">—</span>
+                </div>
+                <div class="search-wrap">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="collegeSearch" class="search-input" placeholder="Search code or name..." oninput="filterColleges()">
+                </div>
+                <div class="college-list" id="collegeList">
+                    <div style="text-align:center; padding:32px 16px; color:var(--text3);">
+                        <i class="fa-solid fa-spinner fa-spin" style="font-size:20px; margin-bottom:10px;"></i>
+                        <div style="font-size:11px;">Loading colleges...</div>
+                    </div>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+        <div class="main-content">
+
+            <!-- Control Bar -->
+            <div class="control-bar no-print">
+                <div class="quota-badges">
+                    <div class="quota-pill unavail" id="badgeHU"><i class="fa-solid fa-circle"></i> HU Seats</div>
+                    <div class="quota-pill unavail" id="badgeOHU"><i class="fa-solid fa-circle"></i> OHU Seats</div>
+                    <div class="quota-pill unavail" id="badgeState"><i class="fa-solid fa-circle"></i> State Level</div>
+                    <div class="quota-pill unavail" id="badgeEWS"><i class="fa-solid fa-circle"></i> EWS</div>
+                    <div class="quota-pill unavail" id="badgeTFWS"><i class="fa-solid fa-circle"></i> TFWS</div>
+                    <div class="quota-pill unavail" id="badgeAI"><i class="fa-solid fa-circle"></i> AI (JEE)</div>
+                </div>
+                <div class="control-actions">
+                    <!-- Table Mode Tabs -->
+                    <div class="mode-tabs" id="modeTabs">
+                        <button class="mode-tab active" onclick="setMode('ALL')">All Tables</button>
+                        <button class="mode-tab" onclick="setMode('HU')">HU</button>
+                        <button class="mode-tab" onclick="setMode('OHU')">OHU</button>
+                        <button class="mode-tab" onclick="setMode('STATE')">State</button>
+                        <button class="mode-tab" onclick="setMode('HU_OHU')">HU+OHU</button>
+                    </div>
+                    <!-- Action buttons -->
+                    <a id="btnDocx" href="#" target="_blank" class="btn btn-docx" title="Download DOCX">
+                        <i class="fa-solid fa-file-word"></i> DOCX
+                    </a>
+                    <button onclick="window.print()" class="btn btn-print" title="Print / Save as PDF">
+                        <i class="fa-solid fa-print"></i>
+                    </button>
+                    <button onclick="recreateFromExcel()" id="btnRegen" class="btn btn-regen" title="Re-generate from Excel">
+                        <i class="fa-solid fa-arrows-rotate"></i> Regenerate
+                    </button>
+                </div>
+            </div>
+
+            <!-- Book Area -->
+            <div class="book-area" id="bookArea">
+                <!-- Progress card (hidden by default) -->
+                <div class="progress-card" id="progressCard">
+                    <div class="progress-header">
+                        <div class="progress-title">
+                            <div class="spinner"></div>
+                            <div>
+                                <div style="font-size:13px;font-weight:700;">Regenerating from Excel...</div>
+                                <div class="progress-status" id="progressStatus">Reading Excel file...</div>
+                            </div>
+                        </div>
+                        <div class="progress-pct" id="progressPct">0%</div>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+
+                <!-- Warnings card -->
+                <div class="warnings-card" id="warningsCard">
+                    <div class="warnings-title">
+                        <i class="fa-solid fa-triangle-exclamation"></i> EWS / TFWS Notice:
+                    </div>
+                    <div id="warningsList"></div>
+                </div>
+
+                <!-- Main book output -->
+                <div id="bookContainer">
+                    <div class="placeholder-state">
+                        <i class="fa-solid fa-book-open"></i>
+                        <h3>Select a College to View Cutoff Table</h3>
+                        <p>Choose any college from the left sidebar.<br>Tables load instantly from cache — no wait time.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ═══════════════ AUTH GUARD ═══════════════
+        (function () {
+            const _fetch = window.fetch.bind(window);
+            window.fetch = async function (...args) {
+                const res = await _fetch(...args);
+                if (res.status === 401 && !String(args[0] || '').includes('/login')) {
+                    window.location.href = '/login';
+                }
+                return res;
+            };
+        })();
+
+        // ═══════════════ STATE ═══════════════
+        let currentCollegeData = null;
+        let activeMode = 'ALL';
+        let allColleges = [];
+        let selectedCollegeCode = null;
+
+        const REGULAR_CATS = ["OPEN","SC","ST","VJ-DT","NT-1 (B)","NT-2 (C)","NT-3 (D)","OBC","SEBC"];
+
+        // ═══════════════ INIT ═══════════════
+        window.addEventListener('DOMContentLoaded', () => {
+            scanExcel();
+        });
+
+        // ═══════════════ EXCEL PATH ═══════════════
+        async function saveExcelPath() {
+            const path = document.getElementById('excelPath').value.trim();
+            if (!path) return;
+            const res = await fetch('/api/config', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({excel_path: path})
+            });
+            const d = await res.json();
+            if (d.status === 'success') {
+                const el = document.getElementById('saveConfirm');
+                el.style.display = 'flex';
+                setTimeout(() => el.style.display = 'none', 2500);
+                scanExcel();
+            }
+        }
+
+        async function resetExcelPath() {
+            const res = await fetch('/api/config', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({excel_path: ''})
+            });
+            const d = await res.json();
+            if (d.status === 'success') {
+                document.getElementById('excelPath').value = d.saved_path;
+                scanExcel();
+            }
+        }
+
+        // ═══════════════ AI (JEE) EXCEL PATH ═══════════════
+        function getAiPath() {
+            const el = document.getElementById('aiExcelPath');
+            return el ? el.value.trim() : '';
+        }
+
+        async function saveAiPath() {
+            const path = getAiPath();
+            if (!path) return;
+            const res = await fetch('/api/config', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ai_excel_path: path})
+            });
+            const d = await res.json();
+            if (d.status === 'success') {
+                const el = document.getElementById('saveAiConfirm');
+                el.style.display = 'flex';
+                setTimeout(() => el.style.display = 'none', 2500);
+                await scanExcel();
+                if (selectedCollegeCode) await refreshSelectedCollege();
+            }
+        }
+
+        async function resetAiPath() {
+            const res = await fetch('/api/config', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ai_excel_path: ''})
+            });
+            const d = await res.json();
+            if (d.status === 'success') {
+                document.getElementById('aiExcelPath').value = d.ai_excel_path;
+                await scanExcel();
+                if (selectedCollegeCode) await refreshSelectedCollege();
+            }
+        }
+
+        async function refreshSelectedCollege() {
+            if (!selectedCollegeCode) return;
+            try {
+                const res = await fetch('/api/get-college-data', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({
+                        college_query: selectedCollegeCode,
+                        excel_path: document.getElementById('excelPath').value.trim(),
+                        ai_excel_path: getAiPath()
+                    })
+                });
+                const resp = await res.json();
+                if (resp.status === 'success') {
+                    currentCollegeData = resp.data;
+                    updateQuotaBadges(resp.data);
+                    updateDocxLink();
+                    renderBook();
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        // ═══════════════ REBUILD ALL TABLES ═══════════════
+        async function rebuildAll() {
+            const btn = document.getElementById('btnRebuildAll');
+            btn.disabled = true;
+            const card = document.getElementById('progressCard');
+            card.classList.add('show');
+            card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            updateProgress(10, 'Reading CET + AI (JEE) Excel files...');
+
+            try {
+                setTimeout(() => updateProgress(45, 'Merging AI (JEE) rank & percentile per branch...'), 400);
+                setTimeout(() => updateProgress(75, 'Rebuilding every college table...'), 900);
+
+                const res = await fetch('/api/precache-all', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({
+                        excel_path: document.getElementById('excelPath').value.trim(),
+                        ai_excel_path: getAiPath()
+                    })
+                });
+                const d = await res.json();
+                if (d.status === 'success') {
+                    updateProgress(100, d.message);
+                    await scanExcel();
+                    await refreshSelectedCollege();
+                    setTimeout(() => card.classList.remove('show'), 2500);
+                } else {
+                    alert('Error: ' + d.message);
+                    card.classList.remove('show');
+                }
+            } catch(e) {
+                alert('Connection error: ' + e);
+                card.classList.remove('show');
+            }
+            btn.disabled = false;
+        }
+
+        // ═══════════════ SCAN EXCEL ═══════════════
+        async function scanExcel() {
+            const path = document.getElementById('excelPath').value.trim();
+            try {
+                const res = await fetch('/api/scan-excel', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({excel_path: path, ai_excel_path: getAiPath()})
+                });
+                const d = await res.json();
+                if (d.status === 'success') {
+                    allColleges = d.colleges;
+                    const aiInfo = d.ai_file_ok
+                        ? ` • AI (JEE): ${d.ai_colleges} colleges`
+                        : ' • AI (JEE): file not found';
+                    document.getElementById('headerCacheStatus').textContent =
+                        `${d.total_colleges} Colleges Ready${aiInfo}`;
+                    document.getElementById('collegeCountLabel').textContent = `${d.total_colleges} colleges`;
+                    renderCollegeList(allColleges);
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        // ═══════════════ COLLEGE LIST ═══════════════
+        function filterColleges() {
+            const q = document.getElementById('collegeSearch').value.toLowerCase().trim();
+            if (!q) { renderCollegeList(allColleges); return; }
+            const filtered = allColleges.filter(c =>
+                (c.code && c.code.toLowerCase().includes(q)) ||
+                (c.name && c.name.toLowerCase().includes(q)) ||
+                (c.city && c.city.toLowerCase().includes(q))
+            );
+            renderCollegeList(filtered);
+        }
+
+        function renderCollegeList(colleges) {
+            const container = document.getElementById('collegeList');
+            if (!colleges.length) {
+                container.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text3);font-size:11px;">No colleges found</div>`;
+                return;
+            }
+            container.innerHTML = colleges.map((c, i) => {
+                const isActive = c.code === selectedCollegeCode || c.name === selectedCollegeCode;
+                return `
+                    <div class="college-item${isActive ? ' active' : ''}" onclick="selectCollege('${escHtml(c.code || c.name)}', this)">
+                        <div class="college-item-code">[${escHtml(c.code || '—')}]</div>
+                        <div class="college-item-name">${escHtml(c.name)}</div>
+                        <div class="college-item-meta">${c.city ? escHtml(c.city) + ' • ' : ''}${c.branches_count} branches${c.has_ai ? ' • <span style="color:#fcd34d;font-weight:700;">AI</span>' : ''}</div>
+                    </div>
+                `;
+            }).join('');
+
+            // Auto-select first on initial load
+            if (!currentCollegeData && colleges.length > 0) {
+                const firstCode = colleges[0].code || colleges[0].name;
+                selectCollege(firstCode, container.querySelector('.college-item'));
+            }
+        }
+
+        function escHtml(s) {
+            return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+        }
+
+        // ═══════════════ SELECT COLLEGE ═══════════════
+        async function selectCollege(code, el) {
+            if (!code) return;
+            selectedCollegeCode = code;
+
+            // Mark active
+            document.querySelectorAll('.college-item').forEach(e => e.classList.remove('active'));
+            if (el) el.classList.add('active');
+
+            const excelPath = document.getElementById('excelPath').value.trim();
+            try {
+                const res = await fetch('/api/get-college-data', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({college_query: code, excel_path: excelPath, ai_excel_path: getAiPath()})
+                });
+                const resp = await res.json();
+                if (resp.status === 'success') {
+                    currentCollegeData = resp.data;
+                    updateQuotaBadges(resp.data);
+                    updateDocxLink();
+                    renderBook();
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        // ═══════════════ MODE TABS ═══════════════
+        function setMode(mode) {
+            activeMode = mode;
+            document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+            const idx = ['ALL','HU','OHU','STATE','HU_OHU'].indexOf(mode);
+            const tabs = document.querySelectorAll('.mode-tab');
+            if (tabs[idx]) tabs[idx].classList.add('active');
+            updateDocxLink();
+            renderBook();
+        }
+
+        // ═══════════════ QUOTA BADGES — STRICT REGULAR DATA VERIFICATION ═══════════════
+        // RULE: A quota is ONLY available if there is at least one valid regular category (OPEN..SEBC)
+        // EWS and TFWS alone do NOT make a quota table available.
+        function updateQuotaBadges(data) {
+            const branches = data.branches || {};
+            const hasHU    = (data.has_hu    === true) && hasRegularSeats(branches, 'HU');
+            const hasOHU   = (data.has_ohu   === true) && hasRegularSeats(branches, 'OHU');
+            const hasState = (data.has_state === true) && hasRegularSeats(branches, 'STATE');
+            const hasEWS   = data.has_ews   === true;
+            const hasTFWS  = data.has_tfws  === true;
+            const aiCount  = data.ai_branches || 0;
+            const hasAI    = data.has_ai === true && aiCount > 0;
+
+            setQuotaPill('badgeHU',    hasHU,    'HU Seats: Available',       'HU Seats: Not Available');
+            setQuotaPill('badgeOHU',   hasOHU,   'OHU Seats: Available',      'OHU Seats: Not Available');
+            setQuotaPill('badgeState', hasState, 'State Level: Available',    'State Level: Not Available');
+            setQuotaPill('badgeEWS',   hasEWS,   'EWS: Available ✓',          'EWS: Not Found');
+            setQuotaPill('badgeTFWS',  hasTFWS,  'TFWS: Available ✓',         'TFWS: Not Found');
+            setAiPill(hasAI, aiCount);
+
+            // Show warnings if any
+            const wCard = document.getElementById('warningsCard');
+            const wList = document.getElementById('warningsList');
+            if (data.blank_warnings && data.blank_warnings.length > 0) {
+                wList.innerHTML = data.blank_warnings.map(w => `<div>• ${w}</div>`).join('');
+                wCard.classList.add('show');
+            } else {
+                wCard.classList.remove('show');
+            }
+        }
+
+        function setQuotaPill(id, avail, trueText, falseText) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (avail) {
+                el.className = 'quota-pill avail';
+                el.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${trueText}`;
+            } else {
+                el.className = 'quota-pill unavail';
+                el.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> ${falseText}`;
+            }
+        }
+
+        function setAiPill(avail, count) {
+            const el = document.getElementById('badgeAI');
+            if (!el) return;
+            if (avail) {
+                el.className = 'quota-pill ai';
+                el.innerHTML = `<i class="fa-solid fa-circle-check"></i> AI (JEE): ${count} branch${count === 1 ? '' : 'es'}`;
+            } else {
+                el.className = 'quota-pill unavail';
+                el.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> AI (JEE): Not Found`;
+            }
+        }
+
+        // ═══════════════ DOCX LINK ═══════════════
+        function updateDocxLink() {
+            if (!currentCollegeData) return;
+            const code = currentCollegeData.college_code || selectedCollegeCode;
+            document.getElementById('btnDocx').href =
+                `/api/download-docx?code=${encodeURIComponent(code)}&mode=${activeMode}`;
+        }
+
+        // ═══════════════ CHECK REGULAR SEATS (for table rendering only) ═══════════════
+        // Used to decide whether to render table or show empty notice
+        // Consistent with server-side logic: only REGULAR_CATS count (NOT EWS / TFWS)
+        function hasRegularSeats(branches, modeKey) {
+            const mk = `${modeKey}_M`;
+            const fk = `${modeKey}_F`;
+            for (const [, b] of Object.entries(branches || {})) {
+                const m = b[mk] || {};
+                const f = b[fk] || {};
+                if (REGULAR_CATS.some(c => m[c] && m[c] !== '-----')) return true;
+                if (REGULAR_CATS.some(c => f[c] && f[c] !== '-----')) return true;
+            }
+            return false;
+        }
+
+        // ═══════════════ RENDER BOOK ═══════════════
+        function renderBook() {
+            if (!currentCollegeData) return;
+            const container = document.getElementById('bookContainer');
+            const data = currentCollegeData;
+            const branches = data.branches || {};
+            const meta = data.web_meta || {};
+
+            // College header
+            const status = data.status || meta.status || '';
+            const university = data.university || meta.university || '';
+            const city = data.city || meta.city || '';
+            const tags = [];
+            if (status) tags.push(`<div class="meta-tag gold">Status: ${esc(status)}</div>`);
+            if (university) tags.push(`<div class="meta-tag blue">University: ${esc(university)}</div>`);
+            if (city) tags.push(`<div class="meta-tag blue">City: ${esc(city)}</div>`);
+            if (!tags.length) {
+                tags.push(`<div class="meta-tag gold">NBA: ${esc(meta.nba_grading || 'Available in MHT-CET Record')}</div>`);
+                tags.push(`<div class="meta-tag blue">Seats: ${esc(meta.total_seats || 'Available')}</div>`);
+            }
+
+            let html = `
+                <div class="college-header-card">
+                    <div class="college-header-left">
+                        <img src="/static/logo.jpg" alt="" class="college-logo" onerror="this.style.display='none'">
+                        <div class="college-name-block">
+                            <div class="college-full-name">${esc(data.full_name)}</div>
+                            <div class="college-address">
+                                <i class="fa-solid fa-location-dot" style="color:var(--red2)"></i>
+                                ${esc(city || data.college_name || 'Maharashtra')}
+                            </div>
+                            ${meta.summary ? `<div class="college-summary"><i class="fa-solid fa-circle-info" style="color:var(--gold);flex-shrink:0;margin-top:1px;"></i> ${esc(meta.summary)}</div>` : ''}
+                        </div>
+                    </div>
+                    <div class="college-meta-tags">${tags.join('')}</div>
+                </div>
+            `;
+
+            // A table is shown ONLY if regular category data exists
+            const showHU    = (data.has_hu    === true) && hasRegularSeats(branches, 'HU');
+            const showOHU   = (data.has_ohu   === true) && hasRegularSeats(branches, 'OHU');
+            const showState = (data.has_state === true) && hasRegularSeats(branches, 'STATE');
+
+            if (activeMode === 'HU') {
+                html += showHU ? renderRankTable('Home University (HU) Cut-off Ranks', branches, 'HU', 'hu') : renderEmptyNotice('Home University (HU)', showState, 'STATE', 'State Level Quota');
+            } else if (activeMode === 'OHU') {
+                html += showOHU ? renderRankTable('Other Than Home University (OHU) Cut-off Ranks', branches, 'OHU', 'ohu') : renderEmptyNotice('Other Than Home University (OHU)', showState, 'STATE', 'State Level Quota');
+            } else if (activeMode === 'STATE') {
+                html += showState ? renderRankTable('State Level (State Quota) Cut-off Ranks', branches, 'STATE', 'state') : renderEmptyNotice('State Level', showHU, 'HU', 'Home University (HU) Quota');
+            } else if (activeMode === 'HU_OHU') {
+                let rendered = 0;
+                if (showHU) { html += renderRankTable('Home University (HU) Cut-off Ranks', branches, 'HU', 'hu'); rendered++; }
+                if (showOHU) { html += renderRankTable('Other Than Home University (OHU) Cut-off Ranks', branches, 'OHU', 'ohu'); rendered++; }
+                if (rendered === 0) html += renderEmptyNotice('Home University & OHU', showState, 'STATE', 'State Level Quota');
+            } else { // ALL
+                let rendered = 0;
+                if (showHU) { html += renderRankTable('Home University (HU) Cut-off Ranks', branches, 'HU', 'hu'); rendered++; }
+                if (showOHU) { html += renderRankTable('Other Than Home University (OHU) Cut-off Ranks', branches, 'OHU', 'ohu'); rendered++; }
+                if (showState) { html += renderRankTable('State Level (State Quota) Cut-off Ranks', branches, 'STATE', 'state'); rendered++; }
+                if (rendered === 0) html += `<div class="empty-quota-card"><i class="fa-solid fa-database"></i><div class="empty-quota-title">No Cutoff Data Available</div><div class="empty-quota-sub">No cutoff ranks found for this college in the database.</div></div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function esc(s) {
+            return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+
+        function renderEmptyNotice(quotaTitle, hasAlternative, altMode, altText) {
+            return `
+                <div class="empty-quota-card table-section">
+                    <i class="fa-solid fa-circle-exclamation" style="color:var(--gold)"></i>
+                    <div class="empty-quota-title">${quotaTitle} — Not Available</div>
+                    <div class="empty-quota-sub">
+                        This institute does not have ${quotaTitle} quota seats. All admissions are conducted under
+                        ${hasAlternative ? `<strong style="color:var(--green2)">${altText || 'the alternative quota'}</strong>` : 'the central seat matrix'}.
+                    </div>
+                    ${hasAlternative ? `<button onclick="setMode('${altMode || 'ALL'}')" class="empty-state-link"><i class="fa-solid fa-arrow-right"></i> View ${altText || 'Available Tables'}</button>` : ''}
+                </div>
+            `;
+        }
+
+        const CAT_COLS = ["OPEN","SC","ST","VJ-DT","NT-1 (B)","NT-2 (C)","NT-3 (D)","OBC","SEBC","EWS","TFWS","AI (JEE)"];
+        const EWS_COLS = new Set(["EWS","TFWS"]);
+        const SHARED_COLS = new Set(["EWS","TFWS","AI (JEE)"]);
+
+        function renderRankTable(title, branches, modeKey, iconClass) {
+            if (!hasRegularSeats(branches, modeKey)) return '';
+            const mk = `${modeKey}_M`, fk = `${modeKey}_F`;
+            let rowsHtml = '';
+            let rowIdx = 0;
+
+            for (const [bName, bData] of Object.entries(branches)) {
+                const m = bData[mk] || {}, f = bData[fk] || {};
+                const hasM = CAT_COLS.some(c => m[c] && m[c] !== '-----');
+                const hasF = CAT_COLS.some(c => f[c] && f[c] !== '-----');
+                const pair = hasM && hasF;
+
+                if (hasM) {
+                    rowsHtml += renderDataRow(bName, 'Male', m, rowIdx++, { rowspanShared: pair });
+                }
+                if (hasF) {
+                    rowsHtml += renderDataRow(hasM ? '' : bName, 'Female', f, rowIdx++, { skipShared: pair });
+                }
+            }
+
+            if (!rowsHtml) return '';
+
+            const iconMap = { hu: 'fa-university', ohu: 'fa-globe', state: 'fa-flag' };
+
+            return `
+                <div class="table-section">
+                    <div class="table-section-title">
+                        <div class="icon-circle ${iconClass}">
+                            <i class="fa-solid ${iconMap[iconClass] || 'fa-table'}"></i>
+                        </div>
+                        <div class="table-title-text">${title}</div>
+                    </div>
+                    <div class="cutoff-table-wrap">
+                        <table class="cutoff-table">
+                            <thead>
+                                <tr>
+                                    <th>Branch (Intake)</th>
+                                    <th>Gender</th>
+                                    <th>OPEN</th><th>SC</th><th>ST</th>
+                                    <th>VJ-DT</th><th>NT-1 (B)</th><th>NT-2 (C)</th>
+                                    <th>NT-3 (D)</th><th>OBC</th><th>SEBC</th>
+                                    <th style="color:#86efac">EWS</th>
+                                    <th style="color:#c4b5fd">TFWS</th>
+                                    <th style="color:#fcd34d">AI (JEE)</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rowsHtml}</tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderDataRow(branchName, gender, data, idx, opts = {}) {
+            const isMale = gender === 'Male';
+            const genderClass = isMale ? 'gender-male' : 'gender-female';
+            const skipShared = !!opts.skipShared;
+            const rowspanShared = !!opts.rowspanShared;
+
+            let cells = CAT_COLS.map(c => {
+                const shared = SHARED_COLS.has(c);
+                if (shared && skipShared) return '';   // merged into the row above
+                const rs = (shared && rowspanShared) ? ' rowspan="2"' : '';
+                const sharedCls = shared ? ' cell-shared' : '';
+                const val = data[c];
+                if (!val || val === '-----') return `<td class="cell-empty${sharedCls}"${rs}>—</td>`;
+                const extra = c === 'EWS' ? ' cell-ews'
+                            : c === 'TFWS' ? ' cell-tfws'
+                            : c === 'AI (JEE)' ? ' cell-ai' : ' cell-val';
+                if (typeof val === 'string' && val.includes('\n')) {
+                    const [top, bottom] = val.split('\n');
+                    const pctCls = c === 'AI (JEE)' ? 'ai-pct' : 'cet-pct';
+                    return `<td class="${extra}${sharedCls}"${rs}>${esc(top)}<span class="${pctCls}">${esc(bottom)}</span></td>`;
+                }
+                return `<td class="${extra}${sharedCls}"${rs}>${esc(val)}</td>`;
+            }).join('');
+
+            return `
+                <tr>
+                    <td>${esc(branchName)}</td>
+                    <td class="${genderClass}">${gender}</td>
+                    ${cells}
+                </tr>
+            `;
+        }
+
+        // ═══════════════ REGENERATE FROM EXCEL ═══════════════
+        async function recreateFromExcel() {
+            if (!selectedCollegeCode) return;
+            const excelPath = document.getElementById('excelPath').value.trim();
+
+            const card = document.getElementById('progressCard');
+            card.classList.add('show');
+            card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            updateProgress(15, 'Opening Excel file from disk...');
+
+            try {
+                setTimeout(() => updateProgress(40, 'Parsing cutoff ranks (R1–R4)...'), 350);
+                setTimeout(() => updateProgress(70, 'Classifying seat quotas (HU / OHU / State)...'), 700);
+
+                const res = await fetch('/api/generate-table', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({
+                        excel_path: excelPath,
+                        ai_excel_path: getAiPath(),
+                        college_query: selectedCollegeCode,
+                        mode: activeMode,
+                        force_refresh: true
+                    })
+                });
+
+                const resp = await res.json();
+                if (resp.status === 'success') {
+                    updateProgress(100, 'Done! Fresh table generated from Excel.');
+                    setTimeout(() => {
+                        card.classList.remove('show');
+                        currentCollegeData = resp.data;
+                        updateQuotaBadges(resp.data);
+                        updateDocxLink();
+                        renderBook();
+                        document.getElementById('bookContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 500);
+                } else {
+                    alert('Error: ' + resp.message);
+                    card.classList.remove('show');
+                }
+            } catch(e) {
+                alert('Connection error: ' + e);
+                card.classList.remove('show');
+            }
+        }
+
+        function updateProgress(pct, status) {
+            document.getElementById('progressPct').textContent = `${pct}%`;
+            document.getElementById('progressFill').style.width = `${pct}%`;
+            document.getElementById('progressStatus').textContent = status;
+        }
+    </script>
+</body>
+</html>
