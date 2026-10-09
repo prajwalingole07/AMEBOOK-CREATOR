@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login · AME CUTOFF BOOK MAKER</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0d1117;
+            --bg2: #161b22;
+            --bg3: #21262d;
+            --border: #30363d;
+            --text: #e6edf3;
+            --text2: #8b949e;
+            --text3: #6e7681;
+            --gold: #d4a017;
+            --gold2: #f0c040;
+            --blue2: #388bfd;
+            --green2: #3fb950;
+            --red2: #f85149;
+        }
+
+        html, body { height: 100%; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background:
+                radial-gradient(900px 500px at 12% -8%, rgba(240,192,64,0.13), transparent 60%),
+                radial-gradient(800px 520px at 105% 15%, rgba(56,139,253,0.13), transparent 62%),
+                radial-gradient(700px 600px at 50% 120%, rgba(110,64,201,0.12), transparent 60%),
+                var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* floating orbs */
+        .orb { position: absolute; border-radius: 50%; filter: blur(70px); opacity: .35; pointer-events: none; }
+        .orb.a { width: 260px; height: 260px; background: var(--gold); top: -70px; left: -60px; animation: float1 13s ease-in-out infinite; }
+        .orb.b { width: 230px; height: 230px; background: var(--blue2); bottom: -70px; right: -50px; animation: float2 15s ease-in-out infinite; }
+        .orb.c { width: 170px; height: 170px; background: #a371f7; top: 62%; left: 8%; opacity: .22; animation: float1 17s ease-in-out infinite reverse; }
+
+        @keyframes float1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(38px,34px) scale(1.12); } }
+        @keyframes float2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-34px,-30px) scale(1.08); } }
+
+        .grid-lines {
+            position: absolute; inset: 0; pointer-events: none; opacity: .35;
+            background-image:
+                linear-gradient(rgba(48,54,61,.35) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(48,54,61,.35) 1px, transparent 1px);
+            background-size: 46px 46px;
+            mask-image: radial-gradient(circle at 50% 45%, #000 0%, transparent 72%);
+            -webkit-mask-image: radial-gradient(circle at 50% 45%, #000 0%, transparent 72%);
+        }
+
+        .login-card {
+            position: relative; z-index: 2;
+            width: 100%; max-width: 420px;
+            background: linear-gradient(180deg, rgba(33,38,45,.92), rgba(22,27,34,.96));
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 38px 34px 30px;
+            box-shadow: 0 30px 70px rgba(0,0,0,.6), 0 0 0 1px rgba(240,192,64,.06) inset;
+            backdrop-filter: blur(14px);
+            animation: rise .55s cubic-bezier(.2,.9,.3,1.2) both;
+        }
+
+        @keyframes rise { from { opacity: 0; transform: translateY(26px) scale(.97); } to { opacity: 1; transform: none; } }
+
+        .brand { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 26px; text-align: center; }
+
+        .logo-ring {
+            width: 84px; height: 84px; border-radius: 50%;
+            display: grid; place-items: center;
+            background: conic-gradient(from 210deg, var(--gold2), var(--gold), #8a6a0f, var(--gold2));
+            padding: 3px;
+            box-shadow: 0 10px 30px rgba(212,160,23,.35);
+            animation: spinGlow 9s linear infinite;
+        }
+        @keyframes spinGlow { to { filter: hue-rotate(12deg); } }
+        .logo-ring img {
+            width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+            background: var(--bg2); border: 3px solid var(--bg);
+        }
+
+        .brand h1 {
+            font-size: 19px; font-weight: 800; letter-spacing: .5px;
+            background: linear-gradient(90deg, var(--gold2), var(--gold) 55%, var(--gold2));
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .brand p { font-size: 12.5px; color: var(--text2); margin-top: -4px; }
+        .badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 10.5px; font-weight: 600; letter-spacing: .6px; text-transform: uppercase;
+            color: var(--green2); background: rgba(63,185,80,.1);
+            border: 1px solid rgba(63,185,80,.32); border-radius: 999px; padding: 4px 11px;
+        }
+        .badge i { font-size: 9px; }
+
+        .alert {
+            display: flex; align-items: center; gap: 9px;
+            font-size: 12.5px; color: var(--red2);
+            background: rgba(248,81,73,.09); border: 1px solid rgba(248,81,73,.35);
+            border-radius: 10px; padding: 10px 12px; margin-bottom: 18px;
+        }
+
+        .field { margin-bottom: 16px; }
+        .field label {
+            display: block; font-size: 11.5px; font-weight: 600; letter-spacing: .7px;
+            text-transform: uppercase; color: var(--text2); margin-bottom: 8px;
+        }
+        .input-wrap { position: relative; }
+
+        .input-wrap i.lead {
+            position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+            color: var(--text3); font-size: 14px; transition: color .2s;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%; padding: 13px 44px 13px 40px;
+            background: rgba(13,17,23,.85); color: var(--text);
+            border: 1px solid var(--border); border-radius: 11px;
+            font-family: 'JetBrains Mono', monospace; font-size: 14px; letter-spacing: .4px;
+            transition: border-color .2s, box-shadow .2s, background .2s;
+            outline: none;
+        }
+        input::placeholder { color: var(--text3); letter-spacing: 1.5px; }
+        input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(212,160,23,.16); background: rgba(13,17,23,1); }
+        .input-wrap:focus-within i.lead { color: var(--gold2); }
+
+        .toggle-pass {
+            position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+            background: transparent; border: 0; color: var(--text3); cursor: pointer;
+            width: 34px; height: 34px; border-radius: 8px; font-size: 14px;
+            transition: color .2s, background .2s;
+        }
+        .toggle-pass:hover { color: var(--gold2); background: rgba(240,192,64,.1); }
+
+        .row { display: flex; align-items: center; justify-content: space-between; margin: 4px 0 20px; }
+        .check { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text2); cursor: pointer; user-select: none; }
+        .check input { accent-color: var(--gold); width: 15px; height: 15px; cursor: pointer; }
+        .row .hint { font-size: 11.5px; color: var(--text3); }
+
+        .btn {
+            width: 100%; padding: 14px; border: 0; border-radius: 12px; cursor: pointer;
+            font-family: 'Inter', sans-serif; font-size: 14.5px; font-weight: 700; letter-spacing: .6px;
+            color: #14100a;
+            background: linear-gradient(90deg, var(--gold2), var(--gold) 55%, #c99410);
+            box-shadow: 0 12px 26px rgba(212,160,23,.28);
+            display: flex; align-items: center; justify-content: center; gap: 9px;
+            transition: transform .16s, box-shadow .16s, filter .16s;
+            position: relative; overflow: hidden;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 16px 32px rgba(212,160,23,.36); filter: brightness(1.05); }
+        .btn:active { transform: translateY(0); }
+        .btn::after {
+            content: ''; position: absolute; top: 0; left: -120%; width: 60%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent);
+            transform: skewX(-20deg); animation: shine 3.4s ease-in-out infinite;
+        }
+        @keyframes shine { 0%, 62% { left: -120%; } 82%, 100% { left: 130%; } }
+
+        .btn.loading { pointer-events: none; filter: saturate(.7); }
+        .spin { display: none; width: 15px; height: 15px; border: 2px solid rgba(20,16,10,.35); border-top-color: #14100a; border-radius: 50%; animation: rot .7s linear infinite; }
+        .btn.loading .spin { display: inline-block; }
+        @keyframes rot { to { transform: rotate(360deg); } }
+
+        .foot { margin-top: 22px; text-align: center; font-size: 11.5px; color: var(--text3); line-height: 1.7; }
+        .foot .dot { color: var(--gold); }
+
+        .shake { animation: shake .42s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake {
+            10%, 90% { transform: translateX(-1px); }
+            20%, 80% { transform: translateX(2px); }
+            30%, 50%, 70% { transform: translateX(-5px); }
+            40%, 60% { transform: translateX(5px); }
+        }
+
+        @media (max-width: 460px) {
+            .login-card { padding: 30px 22px 24px; }
+            .brand h1 { font-size: 17px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="orb a"></div>
+    <div class="orb b"></div>
+    <div class="orb c"></div>
+    <div class="grid-lines"></div>
+
+    <div class="login-card" id="card">
+        <div class="brand">
+            <div class="logo-ring">
+                <img src="{{ url_for('static', filename='logo.jpg') }}" alt="AME logo"
+                     onerror="this.style.display='none'">
+            </div>
+            <div>
+                <h1>AME CUTOFF BOOK MAKER</h1>
+                <p>MHT-CET &amp; AI (JEE) Rank Analyzer</p>
+            </div>
+            <span class="badge"><i class="fa-solid fa-shield-halved"></i> Secure Login</span>
+        </div>
+
+        {% if error %}
+        <div class="alert shake" id="alert">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>{{ error }}</span>
+        </div>
+        {% endif %}
+
+        <form method="POST" action="/login{% if request.args.get('next') %}?next={{ request.args.get('next') }}{% endif %}" id="loginForm" autocomplete="off">
+            <div class="field">
+                <label for="username">Username</label>
+                <div class="input-wrap">
+                    <i class="fa-solid fa-user lead"></i>
+                    <input type="text" id="username" name="username" placeholder="Enter username"
+                           value="{{ request.form.get('username', '') }}" required autofocus spellcheck="false">
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="password">Password</label>
+                <div class="input-wrap">
+                    <i class="fa-solid fa-lock lead"></i>
+                    <input type="password" id="password" name="password" placeholder="Enter password" required>
+                    <button type="button" class="toggle-pass" id="togglePass" aria-label="Show password">
+                        <i class="fa-regular fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="row">
+                <label class="check"><input type="checkbox" name="remember" checked> Remember me</label>
+                <span class="hint"><i class="fa-solid fa-key"></i> Authorized users only</span>
+            </div>
+
+            <button class="btn" type="submit" id="submitBtn">
+                <span class="spin"></span>
+                <i class="fa-solid fa-right-to-bracket"></i>
+                <span id="btnText">Sign In</span>
+            </button>
+        </form>
+
+        <div class="foot">
+            CET R1–R4 + AI (JEE) Rank &amp; Percentile <span class="dot">•</span> Auto-generated Word Books<br>
+            © 2027 AME Cutoff Book Maker
+        </div>
+    </div>
+
+    <script>
+        const pass = document.getElementById('password');
+        const toggle = document.getElementById('togglePass');
+        toggle.addEventListener('click', () => {
+            const showing = pass.type === 'text';
+            pass.type = showing ? 'password' : 'text';
+            toggle.innerHTML = showing
+                ? '<i class="fa-regular fa-eye"></i>'
+                : '<i class="fa-regular fa-eye-slash"></i>';
+            pass.focus();
+        });
+
+        const form = document.getElementById('loginForm');
+        const btn = document.getElementById('submitBtn');
+        form.addEventListener('submit', () => {
+            btn.classList.add('loading');
+            document.getElementById('btnText').textContent = 'Signing in…';
+        });
+
+        {% if error %}
+        document.getElementById('password').value = '';
+        document.getElementById('password').focus();
+        {% endif %}
+    </script>
+</body>
+</html>
