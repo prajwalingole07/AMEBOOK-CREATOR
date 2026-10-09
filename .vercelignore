@@ -1,0 +1,8 @@
+.vercelignore
+.vercel
+node_modules
+__pycache__
+*.pyc
+College_Data
+cache_backup
+*.log

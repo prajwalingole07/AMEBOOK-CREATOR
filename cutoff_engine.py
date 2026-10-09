@@ -1,11 +1,12 @@
 import os
 import re
+import io
 import shutil
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 from docx import Document
-from docx.shared import Inches, Pt, Cm
+from docx.shared import Inches, Pt, Cm, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
 from docx.oxml.ns import qn, nsdecls
@@ -773,17 +774,40 @@ def make_run(p, text, bold=False, size=8):
     run.font._element.rPr.rFonts.set(qn('w:eastAsia'), 'Arial')
     return run
 
+# JoSAA-document layout constants: the per-college Word file must match the
+# JoSAA downloads page for page - 0.4" margins, every table exactly filling
+# the usable width (11.69 - 2*0.4 = 10.89") with a hair to spare, centred.
+DOC_MARGIN_IN = 0.4
+DOC_TABLE_WIDTH_IN = 10.85          # JoSAA uses 10.85" tables on 10.89" usable
+DOC_TITLE = "MHT-CET 2026-27  |  OPENING & CLOSING RANKS  (Source: Excel)"
+
+
+def _fit_widths(widths):
+    """Scale a column-width list so it sums to DOC_TABLE_WIDTH_IN."""
+    total = float(sum(widths))
+    if total <= 0:
+        return list(widths)
+    f = DOC_TABLE_WIDTH_IN / total
+    return [w * f for w in widths]
+
+
 def create_docx_header_logo(doc, logo_path):
     if logo_path and os.path.exists(logo_path):
         try:
             p = doc.add_paragraph()
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
             p.paragraph_format.space_before = Pt(0)
-            p.paragraph_format.space_after = Pt(4)
+            p.paragraph_format.space_after = Pt(2)
             run = p.add_run()
-            run.add_picture(logo_path, width=Inches(1.0))
+            run.add_picture(logo_path, width=Inches(0.95))
         except Exception as e:
             print(f"Error adding logo to docx: {e}")
+    p = doc.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p.paragraph_format.space_before = Pt(0)
+    p.paragraph_format.space_after = Pt(6)
+    run = make_run(p, DOC_TITLE, bold=True, size=10.5)
+    run.font.color.rgb = RGBColor(0x1F, 0x4E, 0x79)
 
 def create_info_box(doc, name, web_meta=None):
     tbl = doc.add_table(rows=3, cols=4)
@@ -802,7 +826,7 @@ def create_info_box(doc, name, web_meta=None):
         [("Total Seats: ", True), (seats, False)],
         [("Available Cut-off: ", True), ("CET R1-R4 + AI (JEE) (Rank + %ile)", False)]
     ]
-    widths = [Inches(4.0), Inches(2.0), Inches(1.5), Inches(2.5)]
+    widths = [Inches(x) for x in _fit_widths([4.0, 2.0, 1.5, 2.5])]
     
     for i, parts in enumerate(texts):
         cell = tbl.cell(0, i)
@@ -887,7 +911,11 @@ def create_rank_table(doc, title, branches, mode):
     tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
     tbl.autofit = False
     
-    w = [2.7, 0.7, 0.72, 0.72, 0.65, 0.65, 0.8, 0.8, 0.8, 0.65, 0.72, 0.65, 0.65, 0.65]
+    # JoSAA proportions, scaled so the 14 columns fill exactly
+    # DOC_TABLE_WIDTH_IN - before this they summed to 11.86" and the table
+    # ran past the page margins.
+    w = _fit_widths([2.7, 0.7, 0.72, 0.72, 0.65, 0.65, 0.8, 0.8, 0.8, 0.65,
+                     0.72, 0.65, 0.65, 0.65])
     for r in tbl.rows:
         for i, wi in enumerate(w): r.cells[i].width = Inches(wi)
 
@@ -931,15 +959,20 @@ def add_page_break(doc):
     p._element.clear()
     p._element.append(parse_xml(f'<w:r {nsdecls("w")}><w:br w:type="page"/></w:r>'))
 
-def generate_word_document(college_data, mode="ALL", logo_path=None, output_folder="College_Data"):
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
-        
+def build_college_docx(college_data, mode="ALL", logo_path=None):
+    """Build the college cut-off Word file fully in memory.
+
+    Returns (bytes, filename).  No disk writes - works on read-only
+    filesystems (Vercel) and never leaves stale files behind.
+    Same content as the on-screen tables: logo header, info box, and one
+    rank table per quota (HU / OHU / STATE) with Branch | Gender rows,
+    CET categories and the merged EWS / TFWS / AI (JEE) cells.
+    """
     doc = Document()
     for s in doc.sections:
         s.page_width, s.page_height = Cm(29.7), Cm(21.0)
-        s.top_margin, s.bottom_margin = Inches(0.5), Inches(0.45)
-        s.left_margin, s.right_margin = Inches(0.5), Inches(0.5)
+        s.top_margin = s.bottom_margin = Inches(DOC_MARGIN_IN)
+        s.left_margin = s.right_margin = Inches(DOC_MARGIN_IN)
 
     st = doc.styles['Normal']
     st.font.name = 'Arial'; st.font.size = Pt(9)
@@ -957,12 +990,17 @@ def generate_word_document(college_data, mode="ALL", logo_path=None, output_fold
     create_docx_header_logo(doc, logo_path)
     create_info_box(doc, name, web_meta)
 
-    if mode == "HU" and has_hu:
-        create_rank_table(doc, "Home University Cut-Off", branches, "HU")
-    elif mode == "OHU" and has_ohu:
-        create_rank_table(doc, "Other Than Home University Cut-Off", branches, "OHU")
-    elif mode == "STATE" and has_state:
-        create_rank_table(doc, "State Level Cut-Off", branches, "STATE")
+    if mode == "HU":
+        if has_hu:
+            create_rank_table(doc, "Home University Cut-Off", branches, "HU")
+    elif mode == "OHU":
+        if has_ohu:
+            create_rank_table(doc, "Other Than Home University Cut-Off", branches, "OHU")
+    elif mode == "STATE":
+        # A college without State quota gets header + info box only -
+        # exactly what the UI shows (an empty-state notice), not ALL tables.
+        if has_state:
+            create_rank_table(doc, "State Level Cut-Off", branches, "STATE")
     elif mode in ("HU_OHU", "4"):
         if has_hu:
             create_rank_table(doc, "Home University Cut-Off", branches, "HU")
@@ -982,21 +1020,20 @@ def generate_word_document(college_data, mode="ALL", logo_path=None, output_fold
             if rendered_count > 0: add_page_break(doc); create_info_box(doc, name, web_meta)
             create_rank_table(doc, "State Level Cut-Off", branches, "STATE")
 
-    safe_name = re.sub(r'[<>:"/\\|?*]', '', name).strip()
+    safe_name = re.sub(r'[<>:"/\\|?*]', '', name).strip().strip('.').strip()
     if not safe_name: safe_name = "College_Cutoff"
-    
-    file_name = f"{safe_name}.docx"
+
+    buf = io.BytesIO()
+    doc.save(buf)
+    return buf.getvalue(), f"{safe_name}.docx"
+
+
+def generate_word_document(college_data, mode="ALL", logo_path=None, output_folder="College_Data"):
+    """Back-compat wrapper: build in memory, then persist to output_folder."""
+    blob, file_name = build_college_docx(college_data, mode=mode, logo_path=logo_path)
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
     file_path = os.path.join(output_folder, file_name)
-    
-    if os.path.exists(file_path):
-        counter = 1
-        while True:
-            new_name = f"{safe_name}_{counter}.docx"
-            new_path = os.path.join(output_folder, new_name)
-            if not os.path.exists(new_path):
-                shutil.move(file_path, new_path)
-                break
-            counter += 1
-            
-    doc.save(file_path)
+    with open(file_path, "wb") as f:
+        f.write(blob)
     return file_path, os.path.basename(file_path)

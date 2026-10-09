@@ -1,11 +1,14 @@
 import os
+import io
 import json
 import tempfile
 import traceback
 from functools import wraps
 from flask import (Flask, render_template, request, jsonify, send_from_directory,
                    send_file, session, redirect, url_for)
-from cutoff_engine import scan_colleges_from_excel, parse_college_data, generate_word_document, fast_precache_all
+from cutoff_engine import (scan_colleges_from_excel, parse_college_data,
+                           generate_word_document, build_college_docx,
+                           fast_precache_all)
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 app.secret_key = os.environ.get('SECRET_KEY', 'ame-cutoff-book-maker-2027-secret')
@@ -449,12 +452,21 @@ def api_generate_table():
 @app.route('/api/download-docx')
 @login_required
 def api_download_docx():
-    """Generates and serves Word document on-demand when user clicks download."""
+    """Builds the college Word file in memory and serves it as an attachment.
+
+    Same instant-download flow as the JoSAA app: no temp files on disk, the
+    filename is taken from the college name, and the table content matches
+    the on-screen CET tables (HU / OHU / STATE, Male+Female, EWS/TFWS/AI
+    merged per branch).
+    """
     code = request.args.get('code', '').strip()
     mode = request.args.get('mode', 'ALL').strip().upper()
     cfg = load_config()
     excel_path = cfg.get('saved_path', DEFAULT_EXCEL_PATH)
     ai_path = cfg.get('ai_excel_path', DEFAULT_AI_EXCEL_PATH)
+
+    if not code:
+        return jsonify({'status': 'error', 'message': 'College code required'}), 400
 
     cache = load_cache()
     prefix = f"{os.path.basename(str(excel_path))}||{os.path.basename(str(ai_path))}_"
@@ -470,10 +482,37 @@ def api_download_docx():
                 break
 
     if not parsed_data:
-        parsed_data = parse_college_data(excel_path, code, mode, ai_path=ai_path)
+        try:
+            parsed_data = parse_college_data(excel_path, code, mode, ai_path=ai_path)
+        except Exception as e:
+            return jsonify({'status': 'error',
+                            'message': f'Could not build the Word file: {e}'}), 500
 
-    file_path, filename = generate_word_document(parsed_data, mode=mode, logo_path=LOGO_PATH, output_folder=OUTPUT_FOLDER)
-    return send_file(file_path, as_attachment=True, download_name=filename)
+    try:
+        blob, filename = build_college_docx(parsed_data, mode=mode,
+                                            logo_path=LOGO_PATH)
+    except Exception as e:
+        return jsonify({'status': 'error',
+                        'message': f'Word build failed: {e}',
+                        'trace': traceback.format_exc()}), 500
+
+    # Optional JoSAA-style Word formatting pass (fit every table to the page,
+    # centred, one page per rank table).  Runs only where MS Word exists
+    # (local Windows); skipped silently on Vercel / Linux - the static
+    # python-docx layout already matches the JoSAA measurements.
+    if request.args.get('fit', '') in ('1', 'true', 'yes'):
+        try:
+            import word_com
+            fitted = word_com.fit_bytes(blob)
+            if fitted is not blob:
+                print(f"word_com fit applied: {len(blob)} -> {len(fitted)} bytes")
+            blob = fitted
+        except Exception as e:
+            print(f"word_com fit skipped: {e}")
+
+    return send_file(io.BytesIO(blob), as_attachment=True, download_name=filename,
+                     mimetype='application/vnd.openxmlformats-officedocument'
+                             '.wordprocessingml.document')
 
 @app.route('/download/<filename>')
 @login_required
